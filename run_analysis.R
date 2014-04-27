@@ -57,6 +57,19 @@ apply_descriptive_label <- function(data) {
     data_descriptive <- merge(data, descriptive_labels)
     data_descriptive
 }
+
+create_aggregates<-function(data){
+
+    library(reshape2)
+    
+    # melt the dataset
+    dimensions = c("Activity_ID", "Activity_Name", "Subject_ID")
+    fact_vars = setdiff(colnames(data), dimensions)
+    molten_data <- melt(data, id=dimensions, measure.vars=fact_vars)
+    
+    # recast
+    dcast(molten_data, Activity_Name + Subject_ID ~ variable, mean) 
+}
 #Wrapper function
 create_assignment_data_set<-function(tidy_file)
 {
@@ -69,6 +82,9 @@ create_assignment_data_set<-function(tidy_file)
 	tidy_data_set<-apply_descriptive_label(merge_data_set())
 	write.table(tidy_data_set,tidy_file)
 
+	agg_data_set<-create_aggregates(tidy_data_set)
+
+	write.table(agg_data_set,paste(tidy_file,"_agg",sep=""))
 }
 
 
